@@ -92,7 +92,7 @@ public class AdminAuthController : ControllerBase
         {
             return Ok();
         }
-        throw new Exception("Failed to update password!");
+        throw new Exception("Failed to update password");
     }
     [HttpPut("VerifyUser")]
     public IActionResult VerifyUser(AdminUserVerification userVerification)
