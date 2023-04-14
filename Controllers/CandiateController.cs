@@ -25,23 +25,22 @@ public class CandidateController : ControllerBase
     [HttpPost("RegisterCandidate")]
     public IActionResult RegisterCandidate(CandidateModel candidateModel)
     {
-        string sqlCheckAdminExists = @"SELECT EmailAddress FROM VotingSchemaApp.AdminLogin WHERE EmailAddress = '" + candidateModel.AdminEmailAddress + "'";
+        string sqlCheckAdminExists = @"SELECT EmailAddress FROM VotingAppSchema.AdminRegistration WHERE EmailAddress = '" + candidateModel.AdminEmailAddress + "'";
+        Console.WriteLine(sqlCheckAdminExists);
         if (sqlCheckAdminExists.Count() > 0)
         {
-            string sqlCommand = @"EXEC spCreateCandidate
-        @FirstName = @FirstNameParam
+            string sqlCommand = @"EXEC spCandidateRegistrationAndUpdate
+        @FirstName = @FirstNameParam,
         @LastName = @LastNameParam,
-        @ImageData = @ImageDataParam,
         @CandidateRole = @CandidateRoleParam,
-        @AdminEmailAddress = @AdminEmailAddressParam";
+        @EmailAddress = @AdminEmailAddressParam";
 
-            DynamicParameters dynamicParameters = new DynamicParameters();
-            dynamicParameters.Add("@FirstNameParam", candidateModel.FirstName, DbType.String);
-            dynamicParameters.Add("@LastNameParam", candidateModel.LastName, DbType.String);
-            dynamicParameters.Add("@ImageDataParam", candidateModel.ImageData, DbType.Binary);
-            dynamicParameters.Add("@CandidateRoleParam", candidateModel.CandidateRole, DbType.String);
-            dynamicParameters.Add("@AdminEmailAddress", candidateModel.AdminEmailAddress, DbType.Single);
-            if (_dapper.ExecuteSqlWithParameters(sqlCommand, dynamicParameters))
+            DynamicParameters sqlParameters = new DynamicParameters();
+            sqlParameters.Add("@FirstNameParam", candidateModel.FirstName, DbType.String);
+            sqlParameters.Add("@LastNameParam", candidateModel.LastName, DbType.String);
+            sqlParameters.Add("@CandidateRoleParam", candidateModel.CandidateRole, DbType.String);
+            sqlParameters.Add("@AdminEmailAddressParam", candidateModel.AdminEmailAddress, DbType.String);
+            if (_dapper.ExecuteSqlWithParameters(sqlCommand, sqlParameters))
             {
                 return Ok();
             }
