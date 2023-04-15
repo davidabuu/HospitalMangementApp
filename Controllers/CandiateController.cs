@@ -47,4 +47,19 @@ public class CandidateController : ControllerBase
         }
         return StatusCode(401, "Unauthorized");
     }
+    [HttpPost("VoteForACandidate")]
+    public IActionResult UserVote(VoteModel voteModel)
+    {
+        string sqlCommand = @"EXEC sppp
+        @int = @EmailAddressParam
+        ";
+        DynamicParameters sqlParamters = new DynamicParameters();
+        sqlParamters.Add("@EmailAddressParam", 2, DbType.Int32);
+       
+        if (_dapper.ExecuteSqlWithParameters(sqlCommand, sqlParamters))
+        {
+            return Ok();
+        }
+        return StatusCode(401, "Unauthorized To Vote");
+    }
 }

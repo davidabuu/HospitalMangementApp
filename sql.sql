@@ -135,51 +135,101 @@ CREATE TABLE VotingAppSchema.CandidateRegistration(
     CandidateId INT IDENTITY(1,1),     
     FirstName VARCHAR(20),
     LastName VARCHAR(20),
-    ImageData VARBINARY(MAX),
-    EmailAddress NVARCHAR(20),
+    ImageData VARBINARY(MAX) DEFAULT 0x00,
     CandidateRole VARCHAR(20),
     VoteCount INT DEFAULT 0
 )
-
 GO
 -- Procedure for Candidate Registration and Update
 CREATE OR ALTER PROCEDURE spCandidateRegistrationAndUpdate
 @FirstName VARCHAR(20),
 @LastName VARCHAR(20),
-@ImageData VARBINARY(MAX),
 @EmailAddress NVARCHAR(20),
 @CandidateRole VARCHAR(20) 
 AS
 BEGIN
-IF NOT EXISTS(SELECT * FROM VotingAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress)
+IF EXISTS(SELECT * FROM VotingAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress)
 BEGIN
 INSERT INTO VotingAppSchema.CandidateRegistration(
 [FirstName],
 [LastName],
-[ImageData],
 [CandidateRole] 
-)VALUES(@FirstName, @LastName, @ImageData, @CandidateRole)
+)VALUES(@FirstName, @LastName, @CandidateRole)
 END
 END
 
 GO
 
 -- Vote For Candidate and Check if User Is Verified
+-- CREATE OR ALTER PROCEDURE spVoteCandidate
+-- @EmailAddress NVARCHAR(20),
+-- @CandidateId INT
+-- AS
+-- BEGIN
+-- IF EXISTS(SELECT UserVerification FROM VotingAppSchema.UserRegistration WHERE EmailAddress = @EmailAddress)
+-- BEGIN
+-- UPDATE VotingAppSchema.CandidateRegistration
+-- SET VoteCount = VoteCount + 1
+-- WHERE CandidateId = @CandidateId
+-- DECLARE @CandidateRole VARCHAR
+-- SELECT @CandidateRole  = CandidateRole FROM VotingAppSchema.CandidateRegistration WHERE CandidateId = @CandidateId
+-- IF NOT EXISTS( SELECT @EmailAddress FROM VotingAppSchema.CandidateRegistration WHERE @CandidateRole = 1)
+-- BEGIN
+-- UPDATE VotingAppSchema.UserRegistration
+-- SET @CandidateRole  = 1
+-- WHERE EmailAddress = @EmailAddress
+-- END
+-- END
+-- ELSE
+-- SELECT 'Sorry you can''t vote because you are not yet verified'
+-- END
+
 CREATE OR ALTER PROCEDURE spVoteCandidate
 @EmailAddress NVARCHAR(20),
 @CandidateId INT
 AS
 BEGIN
-IF EXISTS(SELECT @EmailAddress FROM VotingAppSchema.UserRegistration WHERE UserVerification = 1)
+DECLARE @is_Verfied BIT
+SELECT @is_Verfied  = UserVerification FROM VotingAppSchema.UserRegistration WHERE EmailAddress = @EmailAddress
+IF @is_Verfied = 1
 BEGIN
-UPDATE VotingAppSchema.CandidateRegistration
-SET VoteCount = VoteCount + 1
-WHERE CandidateId = @CandidateId
 DECLARE @CandidateRole VARCHAR
 SELECT @CandidateRole  = CandidateRole FROM VotingAppSchema.CandidateRegistration WHERE CandidateId = @CandidateId
-UPDATE VotingAppSchema.UserRegistration
-SET @CandidateRole  = 1
+DECLARE @CheckRoleStatus BIT
+SELECT @CheckRoleStatus = @CandidateRole FROM VotingAppSchema.UserRegistration WHERE EmailAddress = @EmailAddress
+IF @CheckRoleStatus = 1
+BEGIN
+SELECT 'You Have Already Voted for this Candidate Category'
 END
 ELSE
-SELECT 'Sorry you can''t vote because you are not yet verified'
+BEGIN
+UPDATE VotingAppSchema.UserRegistration
+SET @CandidateRole  = 1
+WHERE EmailAddress = @EmailAddress
+END 
 END
+ELSE
+BEGIN
+PRINT 'You Are Not Verified To Vote Yet'
+END
+END
+
+GO
+
+
+CREATE OR ALTER PROCEDURE sppp
+@int INT
+AS
+BEGIN
+IF(@int = 2)
+BEGIN
+SELECT 'true'
+END
+ELSE 
+BEGIN
+SELECT 'False'
+END
+END
+
+EXEC sppp
+@int = 1
