@@ -11,7 +11,7 @@ namespace DotnetAPI.Data
         {
             _configuration = configuration;
         }
-        private System.Data.IDbConnection Connection()
+        public System.Data.IDbConnection Connection()
         {
             IDbConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             return connection;
@@ -41,6 +41,13 @@ namespace DotnetAPI.Data
         {
             IDbConnection connection = Connection();
             return connection.QuerySingle<T>(sqlCommand, parameters);
+        }
+        public string ExecuteSqlWithParametersAndScalar(string sqlCommand)
+        {
+            IDbConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            connection.Open();
+            SqlCommand command = new SqlCommand(sqlCommand, (SqlConnection)connection);
+            return (string)command.ExecuteScalar();
         }
 
     }
