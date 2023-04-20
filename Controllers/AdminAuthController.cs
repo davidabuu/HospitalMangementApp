@@ -24,7 +24,7 @@ public class AdminAuthController : ControllerBase
     public IActionResult VerifyUser(AdminUserVerification userVerification)
     {
         string sqlCommand = @"EXEC spUserVerification
-        @UserId = @UserIdParam,
+        @UserId = @UserIdParam
         @EmailAddress = @EmailAddressParam";
         DynamicParameters sqlParameters = new DynamicParameters();
         sqlParameters.Add("@EmailAddressParam", userVerification.EmailAddress, DbType.String);

@@ -1,5 +1,6 @@
 using System.Data;
 using Dapper;
+using DotnetAPI.Model;
 using Microsoft.Data.SqlClient;
 namespace DotnetAPI.Data
 {
@@ -42,13 +43,21 @@ namespace DotnetAPI.Data
             IDbConnection connection = Connection();
             return connection.QuerySingle<T>(sqlCommand, parameters);
         }
-        public string ExecuteSqlWithParametersAndScalar(SqlCommand command, string sql)
+        public string ExecuteSqlWithParametersAndScalar(string sql, SolarModel solarModel)
         {
             IDbConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             connection.Open();
-            command = new SqlCommand(sql, (SqlConnection)connection);
+            SqlCommand command = new SqlCommand(sql, (SqlConnection)connection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add("@UserId", SqlDbType.Int).Value = solarModel.UserId;
+            command.Parameters.Add("@GetCurrent", SqlDbType.Decimal).Value = solarModel.Current;
+            command.Parameters.Add("@Voltage", SqlDbType.Decimal).Value = solarModel.Voltage;
+            command.Parameters.Add("@Radiance", SqlDbType.Decimal).Value = solarModel.Radiance;
+            command.Parameters.Add("@GetDate", SqlDbType.Decimal).Value = solarModel.GetDate;
+            command.Parameters.Add("@GetStatus", SqlDbType.Int).Value = solarModel.Status;
             return (string)command.ExecuteScalar();
         }
 
+     
     }
 }
