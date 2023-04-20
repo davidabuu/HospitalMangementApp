@@ -70,7 +70,7 @@ namespace DotnetAPI.Helpers
 
         }
 
-        public bool SetPassword(UserForRegistration userLogin)
+        public bool SetPassword(UserForRegistration userRegistration)
         {
 
             byte[] passwordSalt = new byte[128 / 8];
@@ -79,89 +79,23 @@ namespace DotnetAPI.Helpers
                 rng.GetNonZeroBytes(passwordSalt);
             }
 
-            byte[] passwordHash = GetPasswordHash(userLogin.Password, passwordSalt);
-            string sql = @"EXEC spUserRegistrationAndUpdate
+            byte[] passwordHash = GetPasswordHash(userRegistration.Password, passwordSalt);
+            string sql = @"EXEC spUserRegistration
             @FirstName = @FirstNameParam,
             @LastName = @LastNameParam,
             @EmailAddress = @EmailAddressParam,
             @PasswordHash = @PasswordHashParam,
-            @PasswordSalt = @PasswordSaltParam";
+            @PasswordSalt = @PasswordSaltParam,
+            @Latitude = @LatitudeParam,
+            @Longitude = @LongitudeParam,
+            @PhoneNumber = @PhoneNumberParam";
             DynamicParameters sqlParamters = new DynamicParameters();
-            sqlParamters.Add("@FirstNameParam", userLogin.FirstName, DbType.String);
-            sqlParamters.Add("@LastNameParam", userLogin.LastName, DbType.String);
-            sqlParamters.Add("@EmailAddressParam", userLogin.EmailAddress, DbType.String);
-            sqlParamters.Add("@PasswordHashParam", passwordHash, DbType.Binary);
-            sqlParamters.Add("@PasswordSaltParam", passwordSalt, DbType.Binary);
-            Console.WriteLine(sql);
-            return _dapper.ExecuteSqlWithParameters(sql, sqlParamters);
-
-        }
-
-
-        public bool SetPasswordAdmin(AdminRegister adminRegister)
-        {
-
-            byte[] passwordSalt = new byte[128 / 8];
-            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-            {
-                rng.GetNonZeroBytes(passwordSalt);
-            }
-
-            byte[] passwordHash = GetPasswordHash(adminRegister.Password, passwordSalt);
-            string sql = @"EXEC spAdminRegistrationAndUpdate
-            @FirstName = @FirstNameParam,
-            @LastName = @LastNameParam,
-            @EmailAddress = @EmailAddressParam,
-            @PasswordHash = @PasswordHashParam,
-            @PasswordSalt = @PasswordSaltParam";
-            DynamicParameters sqlParamters = new DynamicParameters();
-            sqlParamters.Add("@FirstNameParam", adminRegister.FirstName, DbType.String);
-            sqlParamters.Add("@LastNameParam", adminRegister.LastName, DbType.String);
-            sqlParamters.Add("@EmailAddressParam", adminRegister.EmailAddress, DbType.String);
-            sqlParamters.Add("@PasswordHashParam", passwordHash, DbType.Binary);
-            sqlParamters.Add("@PasswordSaltParam", passwordSalt, DbType.Binary);
-            Console.WriteLine(sql);
-            return _dapper.ExecuteSqlWithParameters(sql, sqlParamters);
-
-        }
-
-        public bool ResetPasswordAdmin(AdminLogin adminLogin)
-        {
-
-            byte[] passwordSalt = new byte[128 / 8];
-            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-            {
-                rng.GetNonZeroBytes(passwordSalt);
-            }
-
-            byte[] passwordHash = GetPasswordHash(adminLogin.Password, passwordSalt);
-            string sql = @"EXEC spResetPasswordAdmin
-            @EmailAddress = @EmailAddressParam,
-            @PasswordHash = @PasswordHashParam,
-            @PasswordSalt = @PasswordSaltParam";
-            DynamicParameters sqlParamters = new DynamicParameters();
-            sqlParamters.Add("@EmailAddressParam", adminLogin.EmailAddress, DbType.String);
-            sqlParamters.Add("@PasswordHashParam", passwordHash, DbType.Binary);
-            sqlParamters.Add("@PasswordSaltParam", passwordSalt, DbType.Binary);
-            return _dapper.ExecuteSqlWithParameters(sql, sqlParamters);
-
-        }
-        public bool ResetPasswordUser(UserLogin userLogin)
-        {
-
-            byte[] passwordSalt = new byte[128 / 8];
-            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-            {
-                rng.GetNonZeroBytes(passwordSalt);
-            }
-
-            byte[] passwordHash = GetPasswordHash(userLogin.Password, passwordSalt);
-            string sql = @"EXEC spResetPasswordUser
-            @EmailAddress = @EmailAddressParam,
-            @PasswordHash = @PasswordHashParam,
-            @PasswordSalt = @PasswordSaltParam";
-            DynamicParameters sqlParamters = new DynamicParameters();
-            sqlParamters.Add("@EmailAddressParam", userLogin.EmailAddress, DbType.String);
+            sqlParamters.Add("@FirstNameParam", userRegistration.FirstName, DbType.String);
+            sqlParamters.Add("@LastNameParam", userRegistration.LastName, DbType.String);
+            sqlParamters.Add("@EmailAddressParam", userRegistration.EmailAddress, DbType.String);
+            sqlParamters.Add("@LatitudeParam", userRegistration.Latitude, DbType.Double);
+            sqlParamters.Add("@LongitudeParam", userRegistration.Longitude, DbType.Double);
+            sqlParamters.Add("@PhoneNumberParam", userRegistration.PhoneNumber, DbType.String);
             sqlParamters.Add("@PasswordHashParam", passwordHash, DbType.Binary);
             sqlParamters.Add("@PasswordSaltParam", passwordSalt, DbType.Binary);
             return _dapper.ExecuteSqlWithParameters(sql, sqlParamters);

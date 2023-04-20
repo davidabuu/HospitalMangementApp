@@ -42,11 +42,11 @@ namespace DotnetAPI.Data
             IDbConnection connection = Connection();
             return connection.QuerySingle<T>(sqlCommand, parameters);
         }
-        public string ExecuteSqlWithParametersAndScalar(string sqlCommand)
+        public string ExecuteSqlWithParametersAndScalar(SqlCommand command, string sql)
         {
             IDbConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             connection.Open();
-            SqlCommand command = new SqlCommand(sqlCommand, (SqlConnection)connection);
+            command = new SqlCommand(sql, (SqlConnection)connection);
             return (string)command.ExecuteScalar();
         }
 

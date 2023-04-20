@@ -26,8 +26,7 @@ public class UserAuthController : ControllerBase
 
         if (userRegister.Password == userRegister.ConfirmPassword)
         {
-            string sqlCheckUserExists = @"SELECT EmailAddress FROM VotingAppSchema.UserRegistration WHERE EmailAddress = '" + userRegister.EmailAddress + "'";
-            Console.WriteLine(sqlCheckUserExists);
+            string sqlCheckUserExists = @"SELECT EmailAddress FROM SolarAppSchema.UserRegistration WHERE EmailAddress = '" + userRegister.EmailAddress + "'";
             IEnumerable<string> existingUsers = _dapper.LoadData<string>(sqlCheckUserExists);
             DynamicParameters sqlParameters = new DynamicParameters();
             if (existingUsers.Count() == 0)
@@ -37,20 +36,16 @@ public class UserAuthController : ControllerBase
                     FirstName = userRegister.FirstName,
                     LastName = userRegister.LastName,
                     EmailAddress = userRegister.EmailAddress,
-                    Password = userRegister.Password
+                    Password = userRegister.Password,
+                    PhoneNumber = userRegister.PhoneNumber,
+                    Latitude = userRegister.Latitude,
+                    Longitude = userRegister.Longitude
                 };
                 if (_authHelper.SetPassword(newUserRegister))
                 {
                     return Ok();
 
                 }
-                for (int i = 1; i <= 10; i++)
-
-
-                {
-                    Console.WriteLine(i);
-                }
-
                 throw new Exception("Failed To Add User");
 
             }
@@ -61,7 +56,7 @@ public class UserAuthController : ControllerBase
     [HttpPost("UserLogin")]
     public IActionResult UserLogin(UserLogin userLogin)
     {
-        string sqlCheckUserExists = @"SELECT EmailAddress FROM VotingAppSchema.UserRegistration  WHERE EmailAddress = '" + userLogin.EmailAddress + "'";
+        string sqlCheckUserExists = @"SELECT EmailAddress FROM SolarAppSchema.UserRegistration  WHERE EmailAddress = '" + userLogin.EmailAddress + "'";
         string sqlCommand = @"EXEC spLoginUserConfirmation
         @EmailAddress = @EmailAddressParam";
         DynamicParameters sqlParameter = new DynamicParameters();
@@ -81,7 +76,7 @@ public class UserAuthController : ControllerBase
                     return StatusCode(401, "Incorrect password!");
                 }
                 string userIdSql = @"
-                SELECT UserId FROM VotingAppSchema.UserRegistration  WHERE EmailAddress = '" + userLogin.EmailAddress + "'";
+                SELECT UserId FROM SolarAppSchema.UserRegistration  WHERE EmailAddress = '" + userLogin.EmailAddress + "'";
                 int userId = _dapper.LoadSingleData<int>(userIdSql);
                 return Ok(new Dictionary<string, string> {
                 {"token", _authHelper.CreateToken(userId)}
@@ -91,13 +86,5 @@ public class UserAuthController : ControllerBase
         }
         return StatusCode(404, " User Do Not Exists");
     }
-    [HttpPost("ResetPasswordUser")]
-    public IActionResult ResetPasswordAdmin(UserLogin userLoginReset)
-    {
-        if (_authHelper.ResetPasswordUser(userLoginReset))
-        {
-            return Ok();
-        }
-        throw new Exception("Failed to update password!");
-    }
+  
 }

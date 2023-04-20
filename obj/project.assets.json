@@ -3142,11 +3142,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\ABU CODES\\Desktop\\DotnetApi\\DotnetApi.csproj",
+      "projectUniqueName": "C:\\Users\\ABU CODES\\Desktop\\Final Year Project\\DotnetApi.csproj",
       "projectName": "DotnetApi",
-      "projectPath": "C:\\Users\\ABU CODES\\Desktop\\DotnetApi\\DotnetApi.csproj",
+      "projectPath": "C:\\Users\\ABU CODES\\Desktop\\Final Year Project\\DotnetApi.csproj",
       "packagesPath": "C:\\Users\\ABU CODES\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\ABU CODES\\Desktop\\DotnetApi\\obj\\",
+      "outputPath": "C:\\Users\\ABU CODES\\Desktop\\Final Year Project\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\ABU CODES\\AppData\\Roaming\\NuGet\\NuGet.Config"
