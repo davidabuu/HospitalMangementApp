@@ -86,5 +86,16 @@ public class UserAuthController : ControllerBase
         }
         return StatusCode(404, " User Do Not Exists");
     }
-  
+    [HttpGet("SolarDetails/{userId}")]
+    public IEnumerable<UserSolarModel> GetUserDetails(int userId)
+    {
+        string sqlCommand = @"EXEC spGetUserDetails
+        @UserId = " + userId + "";
+
+        return _dapper.LoadData<UserSolarModel>(sqlCommand);
+
+
+
+    }
+
 }

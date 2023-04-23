@@ -9,5 +9,6 @@ namespace DotnetAPI.Model
         public double Voltage { get; set; }
         public double Radiance { get; set; }
         public int Status { get; set; }
+        public string EmailAddress {get; set;} = "";
     }
 }

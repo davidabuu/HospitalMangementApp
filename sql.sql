@@ -1,235 +1,225 @@
--- Admin SQL SCRIP
-CREATE DATABASE VotingDatabase
-USE VotingDatabase
+CREATE DATABASE SolarDatabase
+USE SolarDatabase
 GO
--- CREATE SCHEMA VotingAppSchema    
--- GO
--- -- Registration Table For Admin
--- CREATE TABLE VotingAppSchema.AdminRegistration(
---     AdminId INT IDENTITY(1,1),     
+-- CREATE SCHEMA SolarAppSchema    
+GO
+-- Registration Table For Users
+-- CREATE TABLE SolarAppSchema.UserRegistration(
+--     UserId INT IDENTITY(1,1),     
 --     FirstName VARCHAR(20),
 --     LastName VARCHAR(20),
---     PasswordSalt VARBINARY(MAX),
---     PasswordHash VARBINARY(MAX),
 --     EmailAddress NVARCHAR(20),
---     AdminRole VARCHAR(10) DEFAULT 'Admin'
+--     PasswordHash VARBINARY(MAX),
+--     PasswordSalt VARBINARY(MAX),
+    -- PhoneNumber VARCHAR(20),
+    -- Latitude DECIMAL (9,6),
+    -- Longitude DECIMAL (9,6),
+--     IsVerified BIT DEFAULT 0
 
 -- )
+-- Registration Table For Admin
+-- CREATE TABLE SolarAppSchema.AdminRegistration(
+--     AdminId INT IDENTITY(1,1),     
+--     EmailAddress NVARCHAR(20),
+--     AdminRole VARCHAR(10) DEFAULT 'Admin',
+--     AdminCode VARCHAR(10) DEFAULT 'code',
+--     UserSolarId INT
+-- )
+
+-- Table For Solar Panel Details 
+-- CREATE TABLE SolarAppSchema.SolarDetails(
+--     SolarId INT IDENTITY(1,1),     
+--     GetDate DATE,
+--     GetCurrent DECIMAL (5,2),
+--     Voltage DECIMAL (5,2),
+--     Radiance DECIMAL (5,2),
+--     GetStatus BIT DEFAULT 0,
+--     UserId INT
+-- )
+--  Create A Table for Users Solar Power Plant
+CREATE TABLE SolarAppSchema.UserSolarPowerPlant(
+    UserId INT,
+    Capacity DECIMAL(5,2),
+    ShortCircuitVoltage DECIMAL(5,2),
+    InverterCapactity DECIMAL(5,2)
+)
+
+CREATE TABLE SolarAppSchema.UserMonitoringDevice(
+    UserId INT,
+    MacAddress VARCHAR(20),
+    IpAddress VARCHAR(20),
+    Port SMALLINT
+)
+
 GO
--- Procedure for Admin Registration and Update
-CREATE OR ALTER PROCEDURE spAdminRegistrationAndUpdate
+-- Sql Script to Verify a User
+CREATE OR ALTER PROCEDURE spUserVerification
+@UserId INT,
+@EmailAddress NVARCHAR(20)
+AS
+BEGIN
+IF EXISTS(SELECT * FROM SolarAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress)
+BEGIN
+UPDATE SolarAppSchema.UserRegistration
+SET IsVerified = 1
+WHERE UserId = @UserId
+END
+END
+GO
+CREATE OR ALTER PROCEDURE spSolarDetailsPerUser
+    @UserId INT,
+    @GetDate DATE,
+    @GetCurrent DECIMAL (5,2),
+    @Voltage DECIMAL (5,2),
+    @Radiance DECIMAL (5,2),
+    @GetStatus BIT
+AS
+BEGIN
+    DECLARE @is_Verified BIT
+    SELECT @is_Verified = IsVerified FROM SolarAppSchema.UserRegistration WHERE UserId = @UserId
+
+    IF EXISTS(SELECT * FROM SolarAppSchema.UserRegistration WHERE UserId = @UserId AND IsVerified = 1 )
+    BEGIN
+        INSERT INTO SolarAppSchema.SolarDetails(
+            [UserId],
+            [GetDate],
+            [GetCurrent],
+            [Voltage],
+            [Radiance],
+            [GetStatus]
+        )VALUES(@UserId, @GetDate, @GetCurrent, @Voltage, @Radiance, @GetStatus) 
+
+        SELECT 'Data successfully inserted' AS [Message]
+    END
+    ELSE
+    BEGIN
+        IF EXISTS (SELECT * FROM SolarAppSchema.UserRegistration WHERE UserId = @UserId AND IsVerified = 0)
+        BEGIN
+            SELECT 'User is not verified yet' AS [Message]
+        END
+        ELSE 
+        BEGIN
+            SELECT 'User is not found' AS [Message]
+        END
+    END
+END
+
+
+GO
+-- Get User Details Complete
+CREATE OR ALTER PROCEDURE spGetUserDetails
+@UserId INT
+AS
+BEGIN
+IF EXISTS(SELECT * FROM SolarAppSchema.UserRegistration WHERE UserId = @UserId AND IsVerified = 1)
+BEGIN
+SELECT * FROM SolarAppSchema.UserRegistration AS UserInfo
+LEFT JOIN SolarAppSchema.SolarDetails AS SolarDetails
+ON UserInfo.UserId = SolarDetails.UserId
+END
+END
+GO
+
+EXEC spGetUserDetails
+@UserId  = 1
+EXEC spGetUserDetails
+          @UserId = 1
+GO
+-- Procedure for User Registration
+CREATE OR ALTER PROCEDURE spUserRegistration
 @FirstName VARCHAR(20),
 @LastName VARCHAR(20),
 @PasswordSalt VARBINARY(MAX),
 @PasswordHash VARBINARY(MAX),
 @EmailAddress NVARCHAR(20),
-@AdminId INT = NULL
+@PhoneNumber VARCHAR(20),
+@Latitude DECIMAL (9,6),
+@Longitude DECIMAL (9,6)
 AS
 BEGIN
-IF NOT EXISTS(SELECT * FROM VotingAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress)
+IF NOT EXISTS(SELECT * FROM SolarAppSchema.UserRegistration WHERE EmailAddress = @EmailAddress)
 BEGIN
-INSERT INTO VotingAppSchema.AdminRegistration(
+INSERT INTO SolarAppSchema.UserRegistration(
 [FirstName],
 [LastName],
-[EmailAddress] 
-)VALUES(@FirstName, @LastName, @EmailAddress)
+[PasswordHash],
+[PasswordSalt],
+[EmailAddress],
+[Latitude],
+[Longitude],
+[PhoneNumber]
+)VALUES(@FirstName, @LastName,@PasswordHash,@PasswordSalt, @EmailAddress, @Latitude, @Longitude, @PhoneNumber)
 END
-ELSE
-BEGIN
-UPDATE VotingAppSchema.AdminRegistration
-SET FirstName = @FirstName,
-    LastName = @LastName,
-    EmailAddress = @EmailAddress,
-    PasswordHash = @PasswordHash,
-    PasswordSalt = @PasswordSalt
-    WHERE AdminId = ISNULL(@AdminId, AdminId)
-END
-END
-GO
--- Procedure for Login Confirmation for Admin
-CREATE OR ALTER PROCEDURE spLoginAdminConfirmation
-@EmailAddress NVARCHAR(20)
-AS
-BEGIN
-SELECT * FROM VotingAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress
 END
 
+
+-- Admin Verify Users
 GO
--- Verify User
-CREATE OR ALTER PROCEDURE VerifyUser
+CREATE OR ALTER PROCEDURE spAdminVerifyUser
 @EmailAddress NVARCHAR(20),
 @UserId INT 
 AS
 BEGIN
-IF EXISTS(SELECT * FROM VotingAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress)
+IF EXISTS(SELECT * FROM SolarAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress)
 BEGIN
-UPDATE VotingAppSchema.UserRegistration 
-SET UserVerification = 1
+UPDATE SolarAppSchema.UserRegistration 
+SET IsVerified = 1
 WHERE UserId = @UserId
 END
-ELSE
-BEGIN
-SELECT 'Only Admin can verify users'
-END
 END
 
--- User SQL SCRIPT
 
--- Registration Table For User
-CREATE TABLE VotingAppSchema.UserRegistration(
-    UserId INT IDENTITY(1,1),     
-    FirstName VARCHAR(20),
-    LastName VARCHAR(20),
-    PasswordSalt VARBINARY(MAX),
-    PasswordHash VARBINARY(MAX),
-    EmailAddress NVARCHAR(20),
-    UserRole VARCHAR(10) DEFAULT 'User',
-    VoteForPresident BIT DEFAULT 0,
-    VoteForVisePresident BIT DEFAULT 0,
-    VoteForPRO BIT DEFAULT 0,
-    UserVerification BIT DEFAULT 0
 
-)
+USE SolarDatabase
+
+
 GO
--- Procedure for User Registration and Update
-CREATE OR ALTER PROCEDURE spUserRegistrationAndUpdate
-@FirstName VARCHAR(20),
-@LastName VARCHAR(20),
-@PasswordSalt VARBINARY(MAX),
-@PasswordHash VARBINARY(MAX),
+-- Create Procedure to add A User Solar Power Plant Data
+CREATE OR ALTER PROCEDURE spUserPowerPlantData
+@UserId INT,
 @EmailAddress NVARCHAR(20),
-@UserId INT = NULL
+@Capacity DECIMAL(5,2),
+@ShortCircuitVoltage DECIMAL(5,2),
+@InverterCapactity DECIMAL(5,2)
 AS
 BEGIN
-IF NOT EXISTS(SELECT * FROM VotingAppSchema.UserRegistration WHERE EmailAddress = @EmailAddress)
+IF EXISTS(SELECT * FROM SolarAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress)
 BEGIN
-INSERT INTO VotingAppSchema.UserRegistration(
-[FirstName],
-[LastName],
-[EmailAddress] 
-)VALUES(@FirstName, @LastName, @EmailAddress)
+IF EXISTS(SELECT * FROM SolarAppSchema.UserRegistration WHERE UserId = @UserId AND IsVerified = 1)
+BEGIN
+INSERT INTO SolarAppSchema.UserSolarPowerPlant(
+    [UserId],
+    [Capacity],
+    [ShortCircuitVoltage],
+    [InverterCapactity]
+)VALUES(@UserId, @Capacity, @ShortCircuitVoltage, @InverterCapactity)
 END
-ELSE
-BEGIN
-UPDATE VotingAppSchema.UserRegistration
-SET FirstName = @FirstName,
-    LastName = @LastName,
-    EmailAddress = @EmailAddress,
-    PasswordHash = @PasswordHash,
-    PasswordSalt = @PasswordSalt
-    WHERE UserId = ISNULL(@UserId, UserId)
-END
-END
-GO
--- Procedure for Login Confirmation for User
-CREATE OR ALTER PROCEDURE spLoginUserConfirmation
-@EmailAddress NVARCHAR(20)
-AS
-BEGIN
-SELECT * FROM VotingAppSchema.UserRegistration WHERE EmailAddress = @EmailAddress
-END
--- Candidate Script
-USE VotingDatabase
--- Registration Table For Candidate
-CREATE TABLE VotingAppSchema.CandidateRegistration(
-    CandidateId INT IDENTITY(1,1),     
-    FirstName VARCHAR(20),
-    LastName VARCHAR(20),
-    ImageData VARBINARY(MAX) DEFAULT 0x00,
-    CandidateRole VARCHAR(20),
-    VoteCount INT DEFAULT 0
-)
-GO
--- Procedure for Candidate Registration and Update
-CREATE OR ALTER PROCEDURE spCandidateRegistrationAndUpdate
-@FirstName VARCHAR(20),
-@LastName VARCHAR(20),
-@EmailAddress NVARCHAR(20),
-@CandidateRole VARCHAR(20) 
-AS
-BEGIN
-IF EXISTS(SELECT * FROM VotingAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress)
-BEGIN
-INSERT INTO VotingAppSchema.CandidateRegistration(
-[FirstName],
-[LastName],
-[CandidateRole] 
-)VALUES(@FirstName, @LastName, @CandidateRole)
-END
-END
-
-GO
-
--- Vote For Candidate and Check if User Is Verified
--- CREATE OR ALTER PROCEDURE spVoteCandidate
--- @EmailAddress NVARCHAR(20),
--- @CandidateId INT
--- AS
--- BEGIN
--- IF EXISTS(SELECT UserVerification FROM VotingAppSchema.UserRegistration WHERE EmailAddress = @EmailAddress)
--- BEGIN
--- UPDATE VotingAppSchema.CandidateRegistration
--- SET VoteCount = VoteCount + 1
--- WHERE CandidateId = @CandidateId
--- DECLARE @CandidateRole VARCHAR
--- SELECT @CandidateRole  = CandidateRole FROM VotingAppSchema.CandidateRegistration WHERE CandidateId = @CandidateId
--- IF NOT EXISTS( SELECT @EmailAddress FROM VotingAppSchema.CandidateRegistration WHERE @CandidateRole = 1)
--- BEGIN
--- UPDATE VotingAppSchema.UserRegistration
--- SET @CandidateRole  = 1
--- WHERE EmailAddress = @EmailAddress
--- END
--- END
--- ELSE
--- SELECT 'Sorry you can''t vote because you are not yet verified'
--- END
-
-CREATE OR ALTER PROCEDURE spVoteCandidate
-@EmailAddress NVARCHAR(20),
-@CandidateId INT
-AS
-BEGIN
-DECLARE @is_Verfied BIT
-SELECT @is_Verfied  = UserVerification FROM VotingAppSchema.UserRegistration WHERE EmailAddress = @EmailAddress
-IF @is_Verfied = 1
-BEGIN
-DECLARE @CandidateRole VARCHAR
-SELECT @CandidateRole  = CandidateRole FROM VotingAppSchema.CandidateRegistration WHERE CandidateId = @CandidateId
-DECLARE @CheckRoleStatus BIT
-SELECT @CheckRoleStatus = @CandidateRole FROM VotingAppSchema.UserRegistration WHERE EmailAddress = @EmailAddress
-IF @CheckRoleStatus = 1
-BEGIN
-SELECT 'You Have Already Voted for this Candidate Category'
-END
-ELSE
-BEGIN
-UPDATE VotingAppSchema.UserRegistration
-SET @CandidateRole  = 1
-WHERE EmailAddress = @EmailAddress
-END 
-END
-ELSE
-BEGIN
-PRINT 'You Are Not Verified To Vote Yet'
-END
-END
-
-GO
-
-
-CREATE OR ALTER PROCEDURE sppp
-@int INT
-AS
-BEGIN
-IF(@int = 2)
-BEGIN
-SELECT 'true'
 END
 ELSE 
+SELECT 'You are not allowed to call this function'
+END
+GO
+--Create Procdure for User Monitoring Device
+CREATE OR ALTER PROCEDURE spUserMonitoringDevice
+@UserId INT,
+@EmailAddress NVARCHAR(20),
+@MacAddress VARCHAR(20),
+@IpAddress VARCHAR(20),
+@Port SMALLINT
+AS
 BEGIN
-SELECT 'False'
+IF EXISTS(SELECT * FROM SolarAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress)
+BEGIN
+IF EXISTS(SELECT * FROM SolarAppSchema.UserRegistration WHERE UserId = @UserId AND IsVerified = 1)
+BEGIN
+INSERT INTO SolarAppSchema.UserMonitoringDevice(
+    [UserId],
+    [MacAddress],
+    [IpAddress],
+    [Port]
+)VALUES(@UserId, @MacAddress, @IpAddress, @Port)
 END
 END
-
-EXEC sppp
-@int = 1
+ELSE
+SELECT 'Not Allowred'
+END

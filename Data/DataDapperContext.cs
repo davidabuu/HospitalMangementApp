@@ -32,6 +32,11 @@ namespace DotnetAPI.Data
             IDbConnection connection = Connection();
             return connection.Execute(sqlCommand, parameters) > 0;
         }
+         public bool ExecuteSql(string sqlCommand)
+        {
+            IDbConnection connection = Connection();
+            return connection.Execute(sqlCommand) > 0;
+        }
         public IEnumerable<T> LoadDataWithParameters<T>(string sqlCommand, DynamicParameters parameters)
         {
             IDbConnection connection = Connection();
@@ -53,11 +58,15 @@ namespace DotnetAPI.Data
             command.Parameters.Add("@GetCurrent", SqlDbType.Decimal).Value = solarModel.Current;
             command.Parameters.Add("@Voltage", SqlDbType.Decimal).Value = solarModel.Voltage;
             command.Parameters.Add("@Radiance", SqlDbType.Decimal).Value = solarModel.Radiance;
-            command.Parameters.Add("@GetDate", SqlDbType.Decimal).Value = solarModel.GetDate;
+            command.Parameters.Add("@GetDate", SqlDbType.Date).Value = solarModel.GetDate;
             command.Parameters.Add("@GetStatus", SqlDbType.Int).Value = solarModel.Status;
-            return (string)command.ExecuteScalar();
+            string message = (string)command.ExecuteScalar();
+            connection.Close();
+
+            Console.WriteLine(message);
+            return message;
         }
 
-     
+
     }
 }

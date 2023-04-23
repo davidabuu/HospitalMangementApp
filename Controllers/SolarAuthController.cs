@@ -23,23 +23,26 @@ public class AuthController : ControllerBase
     [HttpPost("SolarDetailsPost")]
     public IActionResult AddSolarDetails(SolarModel solarModel)
     {
-        string sqlCommand = @"EXEC spSolarDetailsPerUser";
+        string sqlCommand = "spSolarDetailsPerUser";
         SolarModel solar = new SolarModel()
         {
+            UserId = solarModel.UserId,
             Current = solarModel.Current,
             Voltage = solarModel.Voltage,
             Radiance = solarModel.Radiance,
             GetDate = solarModel.GetDate,
             Status = solarModel.Status
         };
-        if (_dapper.ExecuteSqlWithParametersAndScalar(sqlCommand, solar) == "User is Not Verified")
+        if(_dapper.ExecuteSqlWithParametersAndScalar(sqlCommand, solar) == "User is not verified yet")
         {
-            throw new Exception("User is not Verified");
+            throw new Exception("User is not verified yet");
         }
         else if (_dapper.ExecuteSqlWithParametersAndScalar(sqlCommand, solar) == "User is not found")
         {
             throw new Exception("User is not found");
         }
-        return Ok();
+        else{
+            return Ok();
+        }
     }
 }
