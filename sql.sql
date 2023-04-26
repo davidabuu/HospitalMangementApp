@@ -221,5 +221,5 @@ INSERT INTO SolarAppSchema.UserMonitoringDevice(
 END
 END
 ELSE
-SELECT 'Not Allowred'
+SELECT 'Not Allowed'
 END
