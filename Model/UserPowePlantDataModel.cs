@@ -4,10 +4,10 @@ namespace DotnetAPI.Model
     {
         public int UserId { get; set; }
 
-        public double Capacity { get; set; }
+        public decimal Capacity { get; set; }
 
-        public double ShortCircuitVoltage { get; set; }
-        public double InverterCapactity { get; set; }
+        public decimal ShortCircuitVoltage { get; set; }
+        public decimal InverterCapactity { get; set; }
 
         public string EmailAddress { get; set; } = "";
 

@@ -89,7 +89,7 @@ public class AdminAuthController : ControllerBase
 
 
     }
-    [HttpPost("UserMonitoringData")]
+    [HttpPost("UserPowerData")]
     public IActionResult AddPowerData(UserPowePlantDataModel userPowePlantDataModel)
     {
         string sqlCommand = @"EXEC spUserPowerPlantData
@@ -97,13 +97,14 @@ public class AdminAuthController : ControllerBase
         @EmailAddress = @EmailAddressParam,
        @Capacity = @CapacityParam,
        @ShortCircuitVoltage = @ShortParam,
-       @InverterCapactity = InverterParam";
+       @InverterCapactity = @InverterParam";
         DynamicParameters sqlParameters = new DynamicParameters();
         sqlParameters.Add("@EmailAddressParam", userPowePlantDataModel.EmailAddress, DbType.String);
         sqlParameters.Add("@UserIdParam", userPowePlantDataModel.UserId, DbType.Int32);
         sqlParameters.Add("@CapacityParam", userPowePlantDataModel.Capacity, DbType.Decimal);
         sqlParameters.Add("@ShortParam", userPowePlantDataModel.ShortCircuitVoltage, DbType.Decimal);
         sqlParameters.Add("@InverterParam", userPowePlantDataModel.InverterCapactity, DbType.Decimal);
+        Console.WriteLine(sqlCommand);
         if (_dapper.ExecuteSqlWithParameters(sqlCommand, sqlParameters))
         {
             return StatusCode(200, "Success");

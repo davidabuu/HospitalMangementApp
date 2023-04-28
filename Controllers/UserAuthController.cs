@@ -43,7 +43,7 @@ public class UserAuthController : ControllerBase
                 };
                 if (_authHelper.SetPassword(newUserRegister))
                 {
-                    return Ok();
+                    return StatusCode(200, "Success");
 
                 }
                 throw new Exception("Failed To Add User");
@@ -86,13 +86,25 @@ public class UserAuthController : ControllerBase
         }
         return StatusCode(404, " User Do Not Exists");
     }
-    [HttpGet("SolarDetails/{userId}")]
-    public IEnumerable<UserSolarModel> GetUserDetails(int userId)
+    [HttpGet("UserSolarInfo/{userId}")]
+    public IEnumerable<SolarModel> GetUserDetails(int userId)
     {
         string sqlCommand = @"EXEC spGetUserDetails
-        @UserId = " + userId + "";
+        @UserId = @UserIdParam";
+        DynamicParameters sqlParameter = new DynamicParameters();
+        sqlParameter.Add("@UserIdParam", userId, DbType.Int16);
 
-        return _dapper.LoadData<UserSolarModel>(sqlCommand);
+        return _dapper.LoadDataWithParameters<SolarModel>(sqlCommand, sqlParameter);
+
+
+
+    }
+    [HttpGet("UserInfo")]
+    public IEnumerable<UserForLoginInfo> GetUserSolarInfo(string email)
+    {
+        string sqlCommand = "SELECT * FROM SolarAppSchema.UserRegistration  WHERE EmailAddress = '" + email + "'";
+
+        return _dapper.LoadData<UserForLoginInfo>(sqlCommand);
 
 
 

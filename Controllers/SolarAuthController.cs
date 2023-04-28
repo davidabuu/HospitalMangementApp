@@ -27,22 +27,24 @@ public class AuthController : ControllerBase
         SolarModel solar = new SolarModel()
         {
             UserId = solarModel.UserId,
-            Current = solarModel.Current,
+            GetCurrent = solarModel.GetCurrent,
             Voltage = solarModel.Voltage,
             Radiance = solarModel.Radiance,
             GetDate = solarModel.GetDate,
-            Status = solarModel.Status
+            GetStatus = solarModel.GetStatus
         };
-        if(_dapper.ExecuteSqlWithParametersAndScalar(sqlCommand, solar) == "User is not verified yet")
+        if (_dapper.ExecuteSqlWithParametersAndScalar(sqlCommand, solar) == "User is not verified yet")
         {
-            throw new Exception("User is not verified yet");
+            throw new Exception("User is not verified yet or Not Found");
         }
-        else if (_dapper.ExecuteSqlWithParametersAndScalar(sqlCommand, solar) == "User is not found")
-        {
-            throw new Exception("User is not found");
-        }
-        else{
-            return Ok();
-        }
+        // else if (_dapper.ExecuteSqlWithParametersAndScalar(sqlCommand, solar) == "User is not found")
+        // {
+        //     throw new Exception("User is not found");
+        // }
+        // else if (_dapper.ExecuteSqlWithParametersAndScalar(sqlCommand, solar) == "Data successfully inserted")
+        // {
+        //     return Ok();
+        // }
+        return Ok();
     }
 }

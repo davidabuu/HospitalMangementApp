@@ -55,11 +55,11 @@ namespace DotnetAPI.Data
             SqlCommand command = new SqlCommand(sql, (SqlConnection)connection);
             command.CommandType = CommandType.StoredProcedure;
             command.Parameters.Add("@UserId", SqlDbType.Int).Value = solarModel.UserId;
-            command.Parameters.Add("@GetCurrent", SqlDbType.Decimal).Value = solarModel.Current;
+            command.Parameters.Add("@GetCurrent", SqlDbType.Decimal).Value = solarModel.GetCurrent;
             command.Parameters.Add("@Voltage", SqlDbType.Decimal).Value = solarModel.Voltage;
             command.Parameters.Add("@Radiance", SqlDbType.Decimal).Value = solarModel.Radiance;
             command.Parameters.Add("@GetDate", SqlDbType.Date).Value = solarModel.GetDate;
-            command.Parameters.Add("@GetStatus", SqlDbType.Int).Value = solarModel.Status;
+            command.Parameters.Add("@GetStatus", SqlDbType.Int).Value = solarModel.GetStatus;
             string message = (string)command.ExecuteScalar();
             connection.Close();
 
