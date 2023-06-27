@@ -19,14 +19,15 @@ CREATE TABLE HospitalSchema.DoctorsRegistration(
     FirstName VARCHAR(20),
     LastName VARCHAR(20),
     Gender VARCHAR(10),
-    Qualifiaction VARCHAR,
-    SpecialistIn VARCHAR,
+    Qualification VARCHAR(20),
+    SpecialistIn VARCHAR(20),
     EmailAddress NVARCHAR(20),
     PasswordHash VARBINARY(MAX),
     PasswordSalt VARBINARY(MAX),
     PhoneNumber VARCHAR(20),
     Verified BIT DEFAULT 0
 )
+
 
 --Registration For Patients
 CREATE TABLE HospitalSchema.PatientsRegistration(
@@ -39,7 +40,7 @@ CREATE TABLE HospitalSchema.PatientsRegistration(
     PasswordHash VARBINARY(MAX),
     PasswordSalt VARBINARY(MAX),
     PhoneNumber VARCHAR(20),
-    PatientsAddress NVARCHAR,
+    PatientsAddress NVARCHAR(MAX),
     PatientsState VARCHAR(15)
 )
 
@@ -96,13 +97,14 @@ INSERT INTO  HospitalSchema.AdminLogin(
 )VALUES(@UserName, @PasswordSalt, @PasswordHash, @AdminRole)
 END
 GO
+
 --Procedure to Add Doctors
 CREATE OR ALTER PROCEDURE spAddDoctors
 @FirstName VARCHAR(20),
 @LastName VARCHAR(20),
 @Gender VARCHAR(10),
-@Qualifiaction VARCHAR,
-@SpecialistIn VARCHAR,
+@Qualification VARCHAR(20),
+@SpecialistIn VARCHAR(20),
 @EmailAddress NVARCHAR(20),
 @PasswordHash VARBINARY(MAX),
 @PasswordSalt VARBINARY(MAX),
@@ -114,14 +116,14 @@ INSERT INTO  HospitalSchema.DoctorsRegistration(
 [FirstName],
 [LastName],
 [Gender],
-[Qualifiaction],
+[Qualification],
 [SpecialistIn],
 [EmailAddress],
 [PasswordHash],
 [PasswordSalt],
 [PhoneNumber],
 [Verified]
-)VALUES(@FirstName, @LastName, @Gender, @Qualifiaction, @SpecialistIn, @EmailAddress, @PasswordHash, @PasswordSalt, @PhoneNumber, @Verified)
+)VALUES(@FirstName, @LastName, @Gender, @Qualification, @SpecialistIn, @EmailAddress, @PasswordHash, @PasswordSalt, @PhoneNumber, @Verified)
 END
 
 GO
@@ -136,7 +138,7 @@ CREATE OR ALTER PROCEDURE spAddPatients
 @PasswordHash VARBINARY(MAX),
 @PasswordSalt VARBINARY(MAX),
 @PhoneNumber VARCHAR(20),
-@PatientsAddress NVARCHAR,
+@PatientsAddress NVARCHAR(MAX),
 @PatientsState VARCHAR(15)
 AS
 BEGIN
@@ -226,3 +228,42 @@ INSERT INTO HospitalSchema.PrescriptionTable(
 [Diagnosis]
 )VALUES(@DoctorsID, @PatientsID, @Quantity, @Medication, @Diagnosis)
 END
+
+GO
+--Procedure for Login Confirmation
+CREATE OR ALTER PROCEDURE spLoginConfirmation_GetForAdmins
+    @UserName NVARCHAR(30)
+AS
+BEGIN
+    SELECT [Auth].[PasswordHash],
+        [Auth].[PasswordSalt] 
+    FROM HospitalSchema.DoctorsRegistration AS Auth 
+        WHERE Auth.EmailAddress = @UserName
+END;
+GO
+--Procedure for Login Confirmation
+CREATE OR ALTER PROCEDURE spLoginConfirmation_GetForDoctors
+    @EmailAddress NVARCHAR(30)
+AS
+BEGIN
+    SELECT [Auth].[PasswordHash],
+        [Auth].[PasswordSalt] 
+    FROM HospitalSchema.DoctorsRegistration AS Auth 
+        WHERE Auth.EmailAddress = @EmailAddress
+END;
+GO
+
+GO
+--Procedure for Login Confirmation
+CREATE OR ALTER PROCEDURE spLoginConfirmation_GetForPatients
+    @EmailAddesss NVARCHAR(30)
+AS
+BEGIN
+    SELECT [Auth].[PasswordHash],
+        [Auth].[PasswordSalt] 
+    FROM HospitalSchema.PatientsRegistration AS Auth 
+        WHERE Auth.EmailAddress = @EmailAddesss
+END;
+GO
+
+

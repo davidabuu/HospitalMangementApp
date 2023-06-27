@@ -1,3 +1,4 @@
+using System.Data;
 using Dapper;
 using DotnetAPI.Data;
 using DotnetAPI.Helpers;
@@ -53,15 +54,34 @@ public class AdminAuthController : ControllerBase
     [HttpPost("AdminLogin")]
     public IActionResult AdminLogin(AdminLogin adminLogin)
     {
-        string sql = @"SELECT * FROM HospitalSchema.AdminLogin WHERE UserName = '" + adminLogin.UserName + "' AND AdminRole =  '" + adminLogin.AdminRole + "'";
-        Console.WriteLine(sql);
-        IEnumerable<string> existingUser = _dapper.LoadData<string>(sql);
-        if (existingUser.Count() > 0)
+        string sqlCheckUserExists = @"SELECT UserName FROM HospitalSchema.AdminLogin  WHERE UserName = '" + adminLogin.UserName + "'";
+        string sqlCommand = @"EXEC spLoginConfirmation_GetForAdmins
+        @UserName = @UserNameParam";
+        DynamicParameters sqlParameter = new DynamicParameters();
+        sqlParameter.Add("@UserNameParam", adminLogin.UserName, DbType.String);
+        IEnumerable<string> existingUsers = _dapper.LoadData<string>
+        (sqlCheckUserExists);
+        if (existingUsers.Count() != 0)
         {
-            return StatusCode(200, "Success");
-        }
-        return StatusCode(404, "Admin Not Found");
+            UserForLoginConfirmation userForConfirmation = _dapper
+                            .LoadDataSingleWithParameters<UserForLoginConfirmation>(sqlCommand, sqlParameter);
+            byte[] passwordHash = _authHelper.GetPasswordHash(adminLogin.Password, userForConfirmation.PasswordSalt);
+            for (int index = 0; index < passwordHash.Length; index++)
+            {
+                if (passwordHash[index] != userForConfirmation.PasswordHash[index])
+                {
+                    return StatusCode(401, "Incorrect password!");
+                }
+                string adminIdSql = @"
+                SELECT AdminID FROM HospitalSchema.AdminLogin  WHERE UserName = '" + adminLogin.UserName + "'";
+                int adminId = _dapper.LoadSingleData<int>(adminIdSql);
+                return Ok(new Dictionary<string, string> {
+                {"token", _authHelper.CreateToken(adminId)}
+            });
 
+            }
+        }
+        return StatusCode(404, " Admin Do Not Exists");
     }
 
 }

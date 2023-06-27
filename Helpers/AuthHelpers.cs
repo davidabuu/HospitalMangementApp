@@ -129,7 +129,46 @@ namespace DotnetAPI.Helpers
             return _dapper.ExecuteSqlWithParameters(sql, sqlParamters);
 
         }
+        public bool SetPasswordForPatients(PatientsRegistration patientsRegistration)
+        {
+
+            byte[] passwordSalt = new byte[128 / 8];
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
+                rng.GetNonZeroBytes(passwordSalt);
+            }
+
+            byte[] passwordHash = GetPasswordHash(patientsRegistration.Password, passwordSalt);
+            string sql = @"EXEC spAddpatients
+            @FirstName = @FirstNameParam,
+            @LastName = @LastNameParam,
+            @EmailAddress = @EmailAddressParam,
+            @PasswordHash = @PasswordHashParam,
+            @PasswordSalt = @PasswordSaltParam,
+            @Age = @AgeParam,
+            @Gender = @GenderParam,
+            @PatientsAddress = @PatientsStateParam,
+            @PatientsState = @PatientsStateParam,
+            @PhoneNumber = @PhoneNumberParam";
+            DynamicParameters sqlParamters = new DynamicParameters();
+            sqlParamters.Add("@FirstNameParam", patientsRegistration.FirstName, DbType.String);
+            sqlParamters.Add("@LastNameParam", patientsRegistration.LastName, DbType.String);
+            sqlParamters.Add("@EmailAddressParam", patientsRegistration.EmailAddress, DbType.String);
+            sqlParamters.Add("@GenderParam", patientsRegistration.Gender, DbType.String);
+            sqlParamters.Add("@PatientsStateParam", patientsRegistration.PatientsState, DbType.String);
+            sqlParamters.Add("@PhoneNumberParam", patientsRegistration.PhoneNumber, DbType.String);
+            sqlParamters.Add("@PasswordHashParam", passwordHash, DbType.Binary);
+            sqlParamters.Add("@PasswordSaltParam", passwordSalt, DbType.Binary);
+            sqlParamters.Add("@PatientsStateParam", patientsRegistration.PatientsState, DbType.String);
+            sqlParamters.Add("@AgeParam", patientsRegistration.Age, DbType.Int16);
+
+            return _dapper.ExecuteSqlWithParameters(sql, sqlParamters);
+
+        }
 
     }
 
+
 }
+    
+

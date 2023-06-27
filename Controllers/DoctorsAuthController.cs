@@ -39,6 +39,7 @@ public class DoctorAuthController : ControllerBase
                     Password = doctorsRegistration.Password,
                     PhoneNumber = doctorsRegistration.PhoneNumber,
                     Gender = doctorsRegistration.Gender,
+                    SpecialistIn = doctorsRegistration.SpecialistIn,
                     Qualification = doctorsRegistration.Qualification,
                     Verified = doctorsRegistration.Verified
                 };
