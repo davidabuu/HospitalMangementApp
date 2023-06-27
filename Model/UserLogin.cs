@@ -1,5 +1,6 @@
 namespace DotnetAPI.Model
 {
+    //UserLogin
     public partial class UserLogin
     {
 

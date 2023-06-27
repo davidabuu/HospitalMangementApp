@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ABU CODES\\Desktop\\Final Year Project\\DotnetApi.csproj": {}
+    "C:\\Users\\ABU CODES\\Desktop\\HospitalManagementBackend\\DotnetApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ABU CODES\\Desktop\\Final Year Project\\DotnetApi.csproj": {
+    "C:\\Users\\ABU CODES\\Desktop\\HospitalManagementBackend\\DotnetApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ABU CODES\\Desktop\\Final Year Project\\DotnetApi.csproj",
+        "projectUniqueName": "C:\\Users\\ABU CODES\\Desktop\\HospitalManagementBackend\\DotnetApi.csproj",
         "projectName": "DotnetApi",
-        "projectPath": "C:\\Users\\ABU CODES\\Desktop\\Final Year Project\\DotnetApi.csproj",
+        "projectPath": "C:\\Users\\ABU CODES\\Desktop\\HospitalManagementBackend\\DotnetApi.csproj",
         "packagesPath": "C:\\Users\\ABU CODES\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ABU CODES\\Desktop\\Final Year Project\\obj\\",
+        "outputPath": "C:\\Users\\ABU CODES\\Desktop\\HospitalManagementBackend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\ABU CODES\\AppData\\Roaming\\NuGet\\NuGet.Config"

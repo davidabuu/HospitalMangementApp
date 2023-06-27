@@ -1,6 +1,6 @@
 namespace DotnetAPI.Model
 {
-    public partial class UserForRegistration
+    public partial class DoctorsRegistration
     {
 
         public string FirstName { get; set; } = "";
@@ -11,12 +11,14 @@ namespace DotnetAPI.Model
         public string Password { get; set; } = "";
 
         public string ConfirmPassword { get; set; } = "";
-        
-        public double Latitude { get; set; }
-        
-        public double Longitude { get; set; }
-        
+
+        public string Qualification { get; set; } = "";
+
+        public string SpecialistIn { get; set; } = "";
+
+        public string Gender { get; set; } = "";
         public string PhoneNumber { get; set; } = "";
+        public int Verified { get; set; }
 
     }
 }

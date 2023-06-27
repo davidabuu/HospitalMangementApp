@@ -1,5 +1,6 @@
 namespace DotnetAPI.Model
 {
+//UserLogin
     public partial class UserForLoginInfo
     {
         public int UserId { get; set; }

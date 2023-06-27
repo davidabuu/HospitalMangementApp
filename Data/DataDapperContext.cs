@@ -32,7 +32,7 @@ namespace DotnetAPI.Data
             IDbConnection connection = Connection();
             return connection.Execute(sqlCommand, parameters) > 0;
         }
-         public bool ExecuteSql(string sqlCommand)
+        public bool ExecuteSql(string sqlCommand)
         {
             IDbConnection connection = Connection();
             return connection.Execute(sqlCommand) > 0;
@@ -48,25 +48,27 @@ namespace DotnetAPI.Data
             IDbConnection connection = Connection();
             return connection.QuerySingle<T>(sqlCommand, parameters);
         }
-        public string ExecuteSqlWithParametersAndScalar(string sql, SolarModel solarModel)
-        {
-            IDbConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
-            connection.Open();
-            SqlCommand command = new SqlCommand(sql, (SqlConnection)connection);
-            command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add("@UserId", SqlDbType.Int).Value = solarModel.UserId;
-            command.Parameters.Add("@GetCurrent", SqlDbType.Decimal).Value = solarModel.GetCurrent;
-            command.Parameters.Add("@Voltage", SqlDbType.Decimal).Value = solarModel.Voltage;
-            command.Parameters.Add("@Radiance", SqlDbType.Decimal).Value = solarModel.Radiance;
-            command.Parameters.Add("@GetDate", SqlDbType.Date).Value = solarModel.GetDate;
-            command.Parameters.Add("@GetStatus", SqlDbType.Int).Value = solarModel.GetStatus;
-            string message = (string)command.ExecuteScalar();
-            connection.Close();
+        // public string ExecuteSqlWithParametersAndScalar(string sql, SolarModel solarModel)
+        // {
+        //     IDbConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+        //     connection.Open();
+        //     SqlCommand command = new SqlCommand(sql, (SqlConnection)connection);
+        //     command.CommandType = CommandType.StoredProcedure;
+        //     command.Parameters.Add("@UserId", SqlDbType.Int).Value = solarModel.UserId;
+        //     command.Parameters.Add("@GetCurrent", SqlDbType.Decimal).Value = solarModel.GetCurrent;
+        //     command.Parameters.Add("@Voltage", SqlDbType.Decimal).Value = solarModel.Voltage;
+        //     command.Parameters.Add("@Radiance", SqlDbType.Decimal).Value = solarModel.Radiance;
+        //     command.Parameters.Add("@GetDate", SqlDbType.Date).Value = solarModel.GetDate;
+        //     command.Parameters.Add("@GetStatus", SqlDbType.Int).Value = solarModel.GetStatus;
+        //     command.Parameters.Add("@SetTime", SqlDbType.DateTime).Value = solarModel.SetTime;
+        //     string message = (string)command.ExecuteScalar();
+        //     connection.Close();
 
-            Console.WriteLine(message);
-            return message;
-        }
+        //     Console.WriteLine(message);
+        //     return message;
+        // }
 
 
     }
+    //UserLogin
 }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "F85GK1nelL8v5viLlOIz3M85wepHoik8LFhW3Zw0Tw7SMF/VkxAp1jSvHAa/OK1L/ovPJnYxCl+bSbh02By3SQ==",
+  "dgSpecHash": "KvyKbsEEzCSpf4kmPfbr0A+9AXm9btqKv6t/JZv2R7sJ9lircw6oWSkTDiPhJJbgmuvX5/7yh58uPTqt4ntpNw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\ABU CODES\\Desktop\\Final Year Project\\DotnetApi.csproj",
+  "projectFilePath": "C:\\Users\\ABU CODES\\Desktop\\HospitalManagementBackend\\DotnetApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ABU CODES\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
     "C:\\Users\\ABU CODES\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",

@@ -1,225 +1,228 @@
-CREATE DATABASE SolarDatabase
-USE SolarDatabase
+CREATE DATABASE HospitalDatabase
+USE HospitalDatabase
 GO
--- CREATE SCHEMA SolarAppSchema    
+CREATE SCHEMA HospitalSchema
 GO
--- Registration Table For Users
--- CREATE TABLE SolarAppSchema.UserRegistration(
---     UserId INT IDENTITY(1,1),     
---     FirstName VARCHAR(20),
---     LastName VARCHAR(20),
---     EmailAddress NVARCHAR(20),
---     PasswordHash VARBINARY(MAX),
---     PasswordSalt VARBINARY(MAX),
-    -- PhoneNumber VARCHAR(20),
-    -- Latitude DECIMAL (9,6),
-    -- Longitude DECIMAL (9,6),
---     IsVerified BIT DEFAULT 0
 
--- )
--- Registration Table For Admin
--- CREATE TABLE SolarAppSchema.AdminRegistration(
---     AdminId INT IDENTITY(1,1),     
---     EmailAddress NVARCHAR(20),
---     AdminRole VARCHAR(10) DEFAULT 'Admin',
---     AdminCode VARCHAR(10) DEFAULT 'code',
---     UserSolarId INT
--- )
-
--- Table For Solar Panel Details 
--- CREATE TABLE SolarAppSchema.SolarDetails(
---     SolarId INT IDENTITY(1,1),     
---     GetDate DATE,
---     GetCurrent DECIMAL (5,2),
---     Voltage DECIMAL (5,2),
---     Radiance DECIMAL (5,2),
---     GetStatus BIT DEFAULT 0,
---     UserId INT
--- )
---  Create A Table for Users Solar Power Plant
-CREATE TABLE SolarAppSchema.UserSolarPowerPlant(
-    UserId INT,
-    Capacity DECIMAL(5,2),
-    ShortCircuitVoltage DECIMAL(5,2),
-    InverterCapactity DECIMAL(5,2)
+--Admin Login
+CREATE TABLE HospitalSchema.AdminLogin(
+    AdminID INT IDENTITY(1,1),
+    UserName VARCHAR(15),
+    PasswordSalt VARBINARY(MAX),
+    PasswordHash VARBINARY(MAX),
+    AdminRole VARCHAR(15)
 )
 
-CREATE TABLE SolarAppSchema.UserMonitoringDevice(
-    UserId INT,
-    MacAddress VARCHAR(20),
-    IpAddress VARCHAR(20),
-    Port SMALLINT
+--Registration For Doctors
+CREATE TABLE HospitalSchema.DoctorsRegistration(
+    DoctorsId INT IDENTITY(1,1) PRIMARY KEY,     
+    FirstName VARCHAR(20),
+    LastName VARCHAR(20),
+    Gender VARCHAR(10),
+    Qualifiaction VARCHAR,
+    SpecialistIn VARCHAR,
+    EmailAddress NVARCHAR(20),
+    PasswordHash VARBINARY(MAX),
+    PasswordSalt VARBINARY(MAX),
+    PhoneNumber VARCHAR(20),
+    Verified BIT DEFAULT 0
 )
 
-GO
--- Sql Script to Verify a User
-CREATE OR ALTER PROCEDURE spUserVerification
-@UserId INT,
-@EmailAddress NVARCHAR(20)
-AS
-BEGIN
-IF EXISTS(SELECT * FROM SolarAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress)
-BEGIN
-UPDATE SolarAppSchema.UserRegistration
-SET IsVerified = 1
-WHERE UserId = @UserId
-END
-END
-GO
-CREATE OR ALTER PROCEDURE spSolarDetailsPerUser
-    @UserId INT,
-    @GetDate DATE,
-    @GetCurrent DECIMAL (5,2),
-    @Voltage DECIMAL (5,2),
-    @Radiance DECIMAL (5,2),
-    @GetStatus BIT
-AS
-BEGIN
-    DECLARE @is_Verified BIT
-    SELECT @is_Verified = IsVerified FROM SolarAppSchema.UserRegistration WHERE UserId = @UserId
+--Registration For Patients
+CREATE TABLE HospitalSchema.PatientsRegistration(
+    PatientsId INT IDENTITY(1,1) PRIMARY KEY,     
+    FirstName VARCHAR(20),
+    LastName VARCHAR(20),
+    Gender VARCHAR(10),
+    Age INT,
+    EmailAddress NVARCHAR(20),
+    PasswordHash VARBINARY(MAX),
+    PasswordSalt VARBINARY(MAX),
+    PhoneNumber VARCHAR(20),
+    PatientsAddress NVARCHAR,
+    PatientsState VARCHAR(15)
+)
 
-    IF EXISTS(SELECT * FROM SolarAppSchema.UserRegistration WHERE UserId = @UserId AND IsVerified = 1 )
-    BEGIN
-        INSERT INTO SolarAppSchema.SolarDetails(
-            [UserId],
-            [GetDate],
-            [GetCurrent],
-            [Voltage],
-            [Radiance],
-            [GetStatus]
-        )VALUES(@UserId, @GetDate, @GetCurrent, @Voltage, @Radiance, @GetStatus) 
+-- Patients Complaint Table
+CREATE TABLE HospitalSchema.PatientsComplaint(
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    TypeOfSickeness NVARCHAR(20),
+    Problem NVARCHAR
+)
 
-        SELECT 'Data successfully inserted' AS [Message]
-    END
-    ELSE
-    BEGIN
-        IF EXISTS (SELECT * FROM SolarAppSchema.UserRegistration WHERE UserId = @UserId AND IsVerified = 0)
-        BEGIN
-            SELECT 'User is not verified yet' AS [Message]
-        END
-        ELSE 
-        BEGIN
-            SELECT 'User is not found' AS [Message]
-        END
-    END
-END
+--Laboratory Test Table
+CREATE TABLE HospitalSchema.LabTestTable(
+    LabID INT IDENTITY(1,1) PRIMARY KEY,
+    NameOfTest NVARCHAR,
+    NameOfLab NVARCHAR,
+    Results BIT,
+    TestDate DATE,
+    TestTime TIME
+)
 
+--Appointement Table
+CREATE TABLE HospitalSchema.AppointementTable(
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    DoctorsID INT,
+    PatientsID INT,
+    AppointmentDate DATE,
+    AppointmentTime TIME
+)
 
-GO
--- Get User Details Complete
-CREATE OR ALTER PROCEDURE spGetUserDetails
-@UserId INT
-AS
-BEGIN
-IF EXISTS(SELECT * FROM SolarAppSchema.UserRegistration WHERE UserId = @UserId AND IsVerified = 1)
-BEGIN
-SELECT * FROM SolarAppSchema.UserRegistration AS UserInfo
-LEFT JOIN SolarAppSchema.SolarDetails AS SolarDetails
-ON UserInfo.UserId = SolarDetails.UserId
-END
-END
+--Prescirption Table
+CREATE TABLE HospitalSchema.PrescriptionTable(
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    DoctorsID INT,
+    PatientsID INT,
+    Quantity INT,
+    Medication NVARCHAR,
+    Diagnosis NVARCHAR
+)
 GO
 
-EXEC spGetUserDetails
-@UserId  = 1
-EXEC spGetUserDetails
-          @UserId = 1
-GO
--- Procedure for User Registration
-CREATE OR ALTER PROCEDURE spUserRegistration
-@FirstName VARCHAR(20),
-@LastName VARCHAR(20),
+--Procedure to Add Admin 
+CREATE OR ALTER PROCEDURE spAdminLogin
+@UserName VARCHAR(15),
 @PasswordSalt VARBINARY(MAX),
 @PasswordHash VARBINARY(MAX),
-@EmailAddress NVARCHAR(20),
-@PhoneNumber VARCHAR(20),
-@Latitude DECIMAL (9,6),
-@Longitude DECIMAL (9,6)
+@AdminRole VARCHAR(15)
 AS
 BEGIN
-IF NOT EXISTS(SELECT * FROM SolarAppSchema.UserRegistration WHERE EmailAddress = @EmailAddress)
+INSERT INTO  HospitalSchema.AdminLogin(
+    [UserName],
+    [PasswordSalt],
+    [PasswordHash],
+    [AdminRole]
+)VALUES(@UserName, @PasswordSalt, @PasswordHash, @AdminRole)
+END
+GO
+--Procedure to Add Doctors
+CREATE OR ALTER PROCEDURE spAddDoctors
+@FirstName VARCHAR(20),
+@LastName VARCHAR(20),
+@Gender VARCHAR(10),
+@Qualifiaction VARCHAR,
+@SpecialistIn VARCHAR,
+@EmailAddress NVARCHAR(20),
+@PasswordHash VARBINARY(MAX),
+@PasswordSalt VARBINARY(MAX),
+@PhoneNumber VARCHAR(20),
+@Verified BIT
+AS
 BEGIN
-INSERT INTO SolarAppSchema.UserRegistration(
+INSERT INTO  HospitalSchema.DoctorsRegistration(
 [FirstName],
 [LastName],
+[Gender],
+[Qualifiaction],
+[SpecialistIn],
+[EmailAddress],
 [PasswordHash],
 [PasswordSalt],
+[PhoneNumber],
+[Verified]
+)VALUES(@FirstName, @LastName, @Gender, @Qualifiaction, @SpecialistIn, @EmailAddress, @PasswordHash, @PasswordSalt, @PhoneNumber, @Verified)
+END
+
+GO
+
+--Procedure to Add Patients
+CREATE OR ALTER PROCEDURE spAddPatients
+@FirstName VARCHAR(20),
+@LastName VARCHAR(20),
+@Gender VARCHAR(10),
+@Age INT,
+@EmailAddress NVARCHAR(20),
+@PasswordHash VARBINARY(MAX),
+@PasswordSalt VARBINARY(MAX),
+@PhoneNumber VARCHAR(20),
+@PatientsAddress NVARCHAR,
+@PatientsState VARCHAR(15)
+AS
+BEGIN
+INSERT INTO HospitalSchema.PatientsRegistration(
+[FirstName],
+[LastName],
+[Gender],
+[Age],
 [EmailAddress],
-[Latitude],
-[Longitude],
-[PhoneNumber]
-)VALUES(@FirstName, @LastName,@PasswordHash,@PasswordSalt, @EmailAddress, @Latitude, @Longitude, @PhoneNumber)
+[PasswordHash],
+[PasswordSalt],
+[PhoneNumber],
+[PatientsAddress],
+[PatientsState]
+)VALUES(@FirstName, @LastName, @Gender, @Age, @EmailAddress, @PasswordHash, @PasswordSalt, @PhoneNumber, @PatientsAddress, @PatientsState)
 END
-END
-
-
--- Admin Verify Users
 GO
-CREATE OR ALTER PROCEDURE spAdminVerifyUser
-@EmailAddress NVARCHAR(20),
-@UserId INT 
+
+
+
+--Procedure to Add Patients Complain
+CREATE OR ALTER PROCEDURE spPatientsComplain
+@TypeOfSickeness NVARCHAR(20),
+@Problem NVARCHAR
 AS
 BEGIN
-IF EXISTS(SELECT * FROM SolarAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress)
-BEGIN
-UPDATE SolarAppSchema.UserRegistration 
-SET IsVerified = 1
-WHERE UserId = @UserId
-END
+INSERT INTO HospitalSchema.PatientsComplaint(
+[TypeOfSickeness],
+[Problem]
+)VALUES(@TypeOfSickeness, @Problem)
 END
 
-
-
-USE SolarDatabase
 
 
 GO
--- Create Procedure to add A User Solar Power Plant Data
-CREATE OR ALTER PROCEDURE spUserPowerPlantData
-@UserId INT,
-@EmailAddress NVARCHAR(20),
-@Capacity DECIMAL(5,2),
-@ShortCircuitVoltage DECIMAL(5,2),
-@InverterCapactity DECIMAL(5,2)
+--Procedure to Add Lab Tests
+CREATE OR ALTER PROCEDURE spLabTests
+@NameOfTest NVARCHAR,
+@NameOfLab NVARCHAR,
+@Results BIT,
+@TestDate DATE,
+@TestTime TIME
 AS
 BEGIN
-IF EXISTS(SELECT * FROM SolarAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress)
-BEGIN
-IF EXISTS(SELECT * FROM SolarAppSchema.UserRegistration WHERE UserId = @UserId AND IsVerified = 1)
-BEGIN
-INSERT INTO SolarAppSchema.UserSolarPowerPlant(
-    [UserId],
-    [Capacity],
-    [ShortCircuitVoltage],
-    [InverterCapactity]
-)VALUES(@UserId, @Capacity, @ShortCircuitVoltage, @InverterCapactity)
+INSERT INTO HospitalSchema.LabTestTable(
+[NameOfTest],
+[NameOfLab],
+[Results],
+[TestDate],
+[TestTime]
+)VALUES(@NameOfTest, @NameOfLab, @Results, @TestDate, @TestTime)
 END
-END
-ELSE 
-SELECT 'You are not allowed to call this function'
-END
+
 GO
---Create Procdure for User Monitoring Device
-CREATE OR ALTER PROCEDURE spUserMonitoringDevice
-@UserId INT,
-@EmailAddress NVARCHAR(20),
-@MacAddress VARCHAR(20),
-@IpAddress VARCHAR(20),
-@Port SMALLINT
+
+--Procedure to Add Appointment Table
+CREATE OR ALTER PROCEDURE spAppiontmentTable
+@DoctorsID INT,
+@PatientsID INT,
+@AppointmentDate DATE,
+@AppointmentTime TIME
 AS
 BEGIN
-IF EXISTS(SELECT * FROM SolarAppSchema.AdminRegistration WHERE EmailAddress = @EmailAddress)
-BEGIN
-IF EXISTS(SELECT * FROM SolarAppSchema.UserRegistration WHERE UserId = @UserId AND IsVerified = 1)
-BEGIN
-INSERT INTO SolarAppSchema.UserMonitoringDevice(
-    [UserId],
-    [MacAddress],
-    [IpAddress],
-    [Port]
-)VALUES(@UserId, @MacAddress, @IpAddress, @Port)
+INSERT INTO HospitalSchema.AppointementTable(
+[DoctorsID],
+[PatientsID],
+[AppointmentDate],
+[AppointmentTime]
+)VALUES(@DoctorsID, @PatientsID, @AppointmentDate, @AppointmentTime)
 END
-END
-ELSE
-SELECT 'Not Allowed'
+
+GO
+
+CREATE OR ALTER PROCEDURE spPresriptionTable
+@DoctorsID INT,
+@PatientsID INT,
+@Quantity INT,
+@Medication NVARCHAR,
+@Diagnosis NVARCHAR
+AS
+BEGIN
+INSERT INTO HospitalSchema.PrescriptionTable(
+[DoctorsID],
+[PatientsID],
+[Quantity],
+[Medication],
+[Diagnosis]
+)VALUES(@DoctorsID, @PatientsID, @Quantity, @Medication, @Diagnosis)
 END

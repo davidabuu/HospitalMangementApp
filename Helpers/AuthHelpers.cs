@@ -70,7 +70,7 @@ namespace DotnetAPI.Helpers
 
         }
 
-        public bool SetPassword(UserForRegistration userRegistration)
+        public bool SetPasswordAdmin(AdminRegistration adminRegistration)
         {
 
             byte[] passwordSalt = new byte[128 / 8];
@@ -79,25 +79,53 @@ namespace DotnetAPI.Helpers
                 rng.GetNonZeroBytes(passwordSalt);
             }
 
-            byte[] passwordHash = GetPasswordHash(userRegistration.Password, passwordSalt);
-            string sql = @"EXEC spUserRegistration
+            byte[] passwordHash = GetPasswordHash(adminRegistration.Password, passwordSalt);
+            string sql = @"EXEC spAdminLogin
+            @UserName = @UserNameParam,
+            @PasswordSalt = @PasswordSaltParam,
+            @PasswordHash = @PasswordHashParam,
+            @AdminRole = @AdminRoleParam";
+            DynamicParameters sqlParamters = new DynamicParameters();
+            Console.WriteLine(sql);
+            sqlParamters.Add("@UserNameParam", adminRegistration.UserName, DbType.String);
+            sqlParamters.Add("@AdminRoleParam", adminRegistration.AdminRole, DbType.String);
+            sqlParamters.Add("@PasswordHashParam", passwordHash, DbType.Binary);
+            sqlParamters.Add("@PasswordSaltParam", passwordSalt, DbType.Binary);
+            return _dapper.ExecuteSqlWithParameters(sql, sqlParamters);
+
+        }
+        public bool SetPasswordDoctors(DoctorsRegistration doctorsRegistration)
+        {
+
+            byte[] passwordSalt = new byte[128 / 8];
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
+                rng.GetNonZeroBytes(passwordSalt);
+            }
+
+            byte[] passwordHash = GetPasswordHash(doctorsRegistration.Password, passwordSalt);
+            string sql = @"EXEC spAddDoctors
             @FirstName = @FirstNameParam,
             @LastName = @LastNameParam,
             @EmailAddress = @EmailAddressParam,
             @PasswordHash = @PasswordHashParam,
             @PasswordSalt = @PasswordSaltParam,
-            @Latitude = @LatitudeParam,
-            @Longitude = @LongitudeParam,
+            @Gender = @GenderParam,
+            @Qualification = @QualificationParam,
+            @SpecialistIn = @SpecialistInParam,
+            @Verified = @VerifiedParam,
             @PhoneNumber = @PhoneNumberParam";
             DynamicParameters sqlParamters = new DynamicParameters();
-            sqlParamters.Add("@FirstNameParam", userRegistration.FirstName, DbType.String);
-            sqlParamters.Add("@LastNameParam", userRegistration.LastName, DbType.String);
-            sqlParamters.Add("@EmailAddressParam", userRegistration.EmailAddress, DbType.String);
-            sqlParamters.Add("@LatitudeParam", userRegistration.Latitude, DbType.Double);
-            sqlParamters.Add("@LongitudeParam", userRegistration.Longitude, DbType.Double);
-            sqlParamters.Add("@PhoneNumberParam", userRegistration.PhoneNumber, DbType.String);
+            sqlParamters.Add("@FirstNameParam", doctorsRegistration.FirstName, DbType.String);
+            sqlParamters.Add("@LastNameParam", doctorsRegistration.LastName, DbType.String);
+            sqlParamters.Add("@EmailAddressParam", doctorsRegistration.EmailAddress, DbType.String);
+            sqlParamters.Add("@GenderParam", doctorsRegistration.Gender, DbType.String);
+            sqlParamters.Add("@QualificationParam", doctorsRegistration.Qualification, DbType.String);
+            sqlParamters.Add("@PhoneNumberParam", doctorsRegistration.PhoneNumber, DbType.String);
             sqlParamters.Add("@PasswordHashParam", passwordHash, DbType.Binary);
             sqlParamters.Add("@PasswordSaltParam", passwordSalt, DbType.Binary);
+            sqlParamters.Add("@SpecialistInParam", doctorsRegistration.SpecialistIn, DbType.String);
+            sqlParamters.Add("@VerifiedParam", doctorsRegistration.Verified, DbType.Int16);
             return _dapper.ExecuteSqlWithParameters(sql, sqlParamters);
 
         }
