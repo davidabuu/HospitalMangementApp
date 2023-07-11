@@ -83,5 +83,53 @@ public class AdminAuthController : ControllerBase
         }
         return StatusCode(404, " Admin Do Not Exists");
     }
+    [HttpDelete("DeleteDoctor")]
+    public IActionResult DeleteDoctor(int id, string userName)
+    {
+        string storedProcedure = "spAdminDeleteDoctors";
+        var parameters = new { DoctorsId = id, userName = userName };
+        IEnumerable<dynamic> doctor = _dapper.Connection().Query(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+        string unauthorizedMessage = "Unauthorized User";
+        if (doctor.AsList().Count > 0 && doctor.AsList()[0].ToString() != unauthorizedMessage)
+        {
+            return Ok(doctor);
+        }
+        else
+        {
+            return Unauthorized();
+        }
+    }
+    [HttpGet("GetAllDoctors")]
+    public IActionResult GetAllDoctors(string userName)
+    {
+        string storedProcedure = "spAdminViewDoctors";
+        var parameters = new { UserName = userName };
+        IEnumerable<dynamic> allDoctors = _dapper.Connection().Query(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+        string unauthorizedMessage = "Unauthorized User";
+        if (allDoctors.AsList().Count > 0 && allDoctors.AsList()[0].ToString() != unauthorizedMessage)
+        {
+            return Ok(allDoctors);
+        }
+        else
+        {
+            return Unauthorized();
+        }
+    }
+    [HttpPut("VerifyDoctors")]
+    public IActionResult VerifyDoctors(string userName, int id)
+    {
+        string storedProcedure = "spAdminVerifyDoctors";
+        var parameters = new { UserName = userName, DoctorsId = id };
+        IEnumerable<dynamic> doctor = _dapper.Connection().Query(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+        string unauthorizedMessage = "Unauthorized User";
+        if (doctor.AsList().Count > 0 && doctor.AsList()[0].ToString() != unauthorizedMessage)
+        {
+            return Ok(doctor);
+        }
+        else
+        {
+            return Unauthorized();
+        }
+    }
 
 }

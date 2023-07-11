@@ -265,5 +265,59 @@ BEGIN
         WHERE Auth.EmailAddress = @EmailAddesss
 END;
 GO
+-- Resuable Procedure
+CREATE PROCEDURE spUnauthorizedUser
+AS
+BEGIN
+    SELECT 'Unauthorized User' AS Message;
+END;
+GO
+-- Admin View Doctors
+CREATE OR ALTER PROCEDURE spAdminViewDoctors
+@UserName NVARCHAR(20)
+AS
+BEGIN
+IF EXISTS (SELECT * FROM HospitalSchema.AdminLogin WHERE UserName = @UserName )
+BEGIN
+SELECT * FROM HospitalSchema.DoctorsRegistration
+END
+ELSE
+BEGIN
+EXEC spUnauthorizedUser
+END
+END
+GO
+-- Admin Delete Doctors
+CREATE OR ALTER PROCEDURE spAdminDeleteDoctors
+@UserName NVARCHAR(20),
+@DoctorsID INT
+AS
+BEGIN
+IF EXISTS (SELECT * FROM HospitalSchema.AdminLogin WHERE UserName = @UserName )
+BEGIN
+DELETE FROM HospitalSchema.DoctorsRegistration WHERE DoctorsId = @DoctorsId
+END
+ELSE
+BEGIN
+EXEC spUnauthorizedUser
+END
+END
+GO
 
-
+-- Admin Verify Doctors
+CREATE OR ALTER PROCEDURE spAdminVerifyDoctors
+@UserName NVARCHAR(20),
+@DoctorsID INT
+AS
+BEGIN
+IF EXISTS (SELECT * FROM HospitalSchema.AdminLogin WHERE UserName = @UserName )
+BEGIN
+UPDATE HospitalSchema.DoctorsRegistration
+SET Verified = 1
+WHERE DoctorsId = @DoctorsID
+END
+ELSE
+BEGIN
+EXEC spUnauthorizedUser
+END
+END
