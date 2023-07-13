@@ -131,5 +131,20 @@ public class AdminAuthController : ControllerBase
             return Unauthorized();
         }
     }
-
+    [HttpGet("ViewPatientsDetails")]
+    public IActionResult ViewPatientsDetails(string userName)
+    {
+        string storedProcedure = "spAdminViewPatientRecords";
+        var parameters = new { UserName = userName };
+        IEnumerable<dynamic> patientsDetails = _dapper.Connection().Query(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+        string unauthorizedMessage = "Unauthorized User";
+        if (patientsDetails.AsList().Count > 0 && patientsDetails.AsList()[0].ToString() != unauthorizedMessage)
+        {
+            return Ok(patientsDetails);
+        }
+        else
+        {
+            return Unauthorized();
+        }
+    }
 }
