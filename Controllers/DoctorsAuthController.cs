@@ -87,4 +87,36 @@ public class DoctorAuthController : ControllerBase
         }
         return StatusCode(404, " Doctor Do Not Exists");
     }
+    [HttpGet("ViewPatientsDetails")]
+    public IActionResult ViewPatientsDetails(string emailAddress)
+    {
+        string storedProcedure = "spViewPatientRecords";
+        var parameters = new { UserName = emailAddress };
+        IEnumerable<dynamic> patientsDetails = _dapper.Connection().Query(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+        string unauthorizedMessage = "Unauthorized User";
+        if (patientsDetails.AsList().Count > 0 && patientsDetails.AsList()[0].ToString() != unauthorizedMessage)
+        {
+            return Ok(patientsDetails);
+        }
+        else
+        {
+            return Unauthorized();
+        }
+    }
+    [HttpGet("DoctorsAppointment")]
+    public IActionResult DoctorsAppointment(string emailAddress)
+    {
+        string storedProcedure = "spDoctorAppointment";
+        var parameters = new { EmailAddress = emailAddress };
+        IEnumerable<dynamic> appointmentDetails = _dapper.Connection().Query(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+        string unauthorizedMessage = "Unauthorized User";
+        if (appointmentDetails.AsList().Count > 0 && appointmentDetails.AsList()[0].ToString() != unauthorizedMessage)
+        {
+            return Ok(appointmentDetails);
+        }
+        else
+        {
+            return Unauthorized();
+        }
+    }
 }
